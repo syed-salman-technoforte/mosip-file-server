@@ -9,36 +9,37 @@ echo -e "\n Generate IDA's VC PUBLIC KEY CERTIFICATE \n";
 echo "AUTHMANAGER URL : $AUTHMANAGER_URL"
 echo "IDA INTERNAL URL : $IDA_INTERNAL_URL"
 
-#echo "* Request for authorization"
-#curl -s -D - -o /dev/null -X "POST" \
-#  "$AUTHMANAGER_URL/authenticate/clientidsecretkey" \
-#  -H "accept: */*" \
-#  -H "Content-Type: application/json" \
-#  -d '{
-#  "id": "string",
-#  "version": "string",
-#  "requesttime": "'$date'",
-#  "metadata": {},
-#  "request": {
-#    "clientId": "'$KEYCLOAK_CLIENT_ID'",
-#    "secretKey": "'$KEYCLOAK_CLIENT_SECRET'",
-#    "appId": "'$AUTH_APP_ID'"
-#  }
-#}' > temp.txt 2>&1 &
+echo "* Request for authorization"
+curl -s -D - -o /dev/null -X "POST" \
+  "$AUTHMANAGER_URL/authenticate/clientidsecretkey" \
+  -H "accept: */*" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "id": "string",
+  "version": "string",
+  "requesttime": "'$date'",
+  "metadata": {},
+  "request": {
+    "clientId": "'$KEYCLOAK_CLIENT_ID'",
+    "secretKey": "'$KEYCLOAK_CLIENT_SECRET'",
+    "appId": "'$AUTH_APP_ID'"
+  }
+}' > temp.txt 2>&1 &
 
-#sleep 10
+sleep 10
 
-#TOKEN=$( cat temp.txt | awk '/[aA]uthorization:/{print $2}' | sed -z 's/\n//g' | sed -z 's/\r//g')
+TOKEN=$( cat temp.txt | awk '/[aA]uthorization:/{print $2}' | sed -z 's/\n//g' | sed -z 's/\r//g')
 
-#if [[ -z $TOKEN ]]; then
-#  echo "Unable to Authenticate with authmanager. \"TOKEN\" is empty; EXITING";
-#  exit 1;
-#fi
+if [[ -z $TOKEN ]]; then
+  echo "Unable to Authenticate with authmanager. \"TOKEN\" is empty; EXITING";
+  exit 1;
+fi
 
-#echo -e "\nGot Authorization token from authmanager"
+echo -e "\nGot Authorization token from authmanager"
 
 curl -X "GET" \
   -H "Accept: application/json" \
+  --cookie "Authorization=$TOKEN" \
   "$IDA_INTERNAL_URL/getCertificate?applicationId=IDA_VCI_EXCHANGE&referenceId=" > result.txt
 
 RESPONSE_COUNT=$( cat result.txt | jq .response )
@@ -48,7 +49,7 @@ if [[ -z $RESPONSE_COUNT ]]; then
 fi
 
 if [[ $RESPONSE_COUNT == null || -z $RESPONSE_COUNT ]]; then
-  echo "No response from keymanager server; EXITING";
+  echo "No response from IDA internal server; EXITING";
   exit 1;
 fi
 
