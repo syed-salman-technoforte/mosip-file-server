@@ -11,7 +11,7 @@ echo "KEYMANAGER URL : $KEYMANAGER_URL"
 
 #echo "* Request for authorization"
 curl -s -D - -o /dev/null -X "POST" \
-  "$AUTHMANAGER_URL/v1/authmanager/authenticate/clientidsecretkey" \
+  "$AUTHMANAGER_URL/authenticate/clientidsecretkey" \
   -H "accept: */*" \
   -H "Content-Type: application/json" \
   -d '{
@@ -41,7 +41,7 @@ echo -e "\nGot Authorization token from authmanager"
 curl -X "GET" \
   -H "Accept: application/json" \
   --cookie "Authorization=$TOKEN" \
-  "$KEYMANAGER_URL/v1/keymanager/getCertificate?applicationId=KERNEL&referenceId=SIGN" > result.txt
+  "$KEYMANAGER_URL/getCertificate?applicationId=KERNEL&referenceId=SIGN" > result.txt
 
 RESPONSE_COUNT=$( cat result.txt | jq .response )
 if [[ -z $RESPONSE_COUNT ]]; then
