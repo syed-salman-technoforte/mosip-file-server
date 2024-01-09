@@ -110,5 +110,6 @@ RUN chown -R ${container_user}:${container_user} /home/${container_user}
 USER ${container_user_uid}:${container_user_gid}
 
 EXPOSE 8080
+ssss
 
 ENTRYPOINT ["./entrypoint.sh"]
